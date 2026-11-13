@@ -34,6 +34,8 @@ First release.
 - Windows backend (amd64 and aarch64): overlapped I/O through `kernel32` over FFM, `\\.\COMn` paths,
   exclusive open (a second open is `PortBusy`), listing with `QueryDosDeviceW`. It is tested against
   a fake `Win32`, and the whole suite passes on GitHub's Windows runner, which has no COM port.
+  On that runner the real `kernel32` calls are checked too: it loads and binds, lists devices,
+  reports a missing port as `NoSuchPort`, and makes and signals events.
   Struct layouts come from the mingw-w64 headers, not from a probe. Mark/space parity and 1.5 stop
   bits are unsupported.
 - Continuous integration on Linux (glibc 2.42, in Docker), macOS and Windows, and publishing to
