@@ -96,9 +96,8 @@ has not approved.
 
 ## Windows
 
-Written, never run on Windows (`backend.windows`, `win32`, `ffi/Kernel32`, `ffi/WindowsLib`; 64-bit only). It is tested over a fake `Win32` and by the opt-in `WindowsPortSuite` (env `FS2_SERIAL_TEST_PORT`). The design: `Backend`/`Device` are the seam, `ManagedPort` is shared,
-`SystemError.Windows` exists, and `Serial.make` already dispatches on `Os` and says "Windows has no
-backend yet". Nothing in `posix`, `ffi` or `platform` fits Windows: it has handles, not descriptors,
+Written. The suite passes on a Windows CI runner (no COM port); it has never been used with a real port (`backend.windows`, `win32`, `ffi/Kernel32`, `ffi/WindowsLib`; 64-bit only). It is tested over a fake `Win32` and by the opt-in `WindowsPortSuite` (env `FS2_SERIAL_TEST_PORT`). The design: `Backend`/`Device` are the seam, `ManagedPort` is shared,
+`SystemError.Windows` exists, and `Serial.make` dispatches on `Os`. Nothing in `posix`, `ffi` or `platform` fits Windows: it has handles, not descriptors,
 and overlapped I/O, not `select`. A Windows backend is a new `backend.windows` plus its own calls
 (`CreateFileW`, `Get/SetCommState`, `SetCommTimeouts`, overlapped `ReadFile`/`WriteFile`,
 `WaitForMultipleObjects`, `CancelIoEx`, `PurgeComm`, `ClearCommError`, `CloseHandle`, and
@@ -110,7 +109,7 @@ means `PortBusy` (a COM port has no per-user permissions); open `\\.\COMn`, alwa
 I cannot run anything on Windows: the maintainer runs the Windows tests and pastes the output. A test that opens a real COM port is opt-in (`FS2_SERIAL_TEST_PORT` names the port, and the test is skipped when it is absent). Tell the maintainer before it opens the port (rule 11), send only harmless commands (`AT`, `ATI`, `ATE0`, `ATE1`), and NEVER dial (`ATD`), answer (`ATA`) or store a profile (`AT&W`). What still cannot be checked: hot unplug (unless the device is USB), and two ends of a link. Struct sizes and constants (`DCB`,
 `COMMTIMEOUTS`, `OVERLAPPED`) can also be printed with a `mingw-w64` probe in Docker; installing mingw
 or Wine in the image needs the maintainer's approval, like any other image. Do not claim a Windows
-backend works until it has run on Windows.
+backend works on hardware until it has run against a real COM port.
 
 ## Rules
 
@@ -196,4 +195,4 @@ backend works until it has run on Windows.
     (sbt-ci-release; the version comes from the tag) once the Linux and macOS jobs pass. It needs
     the secrets `PGP_SECRET`, `PGP_PASSPHRASE`, `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`. Move
     the `[Unreleased]` notes in `CHANGELOG.md` under the version first. NEVER tag without being
-    asked, and do not release while the Windows backend has never run on Windows without saying so.
+    asked, and say in the notes that the Windows backend has not been used with a real COM port, until it has.

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-13
+
+First release.
+
 ### Added
 
 - `Serial.make[F]`: binds the C library once and gives a `Serial[F]` (or a `PlatformError` on an
@@ -18,7 +22,7 @@
   and through the `IOSSIOSPEED` ioctl on macOS.
 - Errors scoped per operation, as values: `OpenError`, `ReadError`, `WriteError`, `ListError`.
   Streams fail with `SerialException`.
-- macOS (x86_64) backend, tested against pseudo-terminals.
+- macOS backend, tested against pseudo-terminals. The suite passes on x86_64 and, in CI, on Apple Silicon.
 - Linux backend (x86_64 and aarch64, glibc 2.42 or newer). The whole test suite passes on x86_64
   with glibc 2.42 (Ubuntu 25.10, in Docker), against pseudo-terminals. aarch64 is untested.
 - `docker/Dockerfile` and `docker/test-linux.sh`: run the whole test suite on Linux (glibc 2.42) in
@@ -27,11 +31,22 @@
 - The backend seam: `Backend` and `Device` separate what every operating system shares (one read and
   one write at a time, closing, streams) from how it waits. Errors carry a `SystemError`, `Posix` or
   `Windows`. `Serial.make` reports an unsupported system as a `PlatformError`.
-- Windows backend (amd64 and aarch64), **written but never run on Windows**: overlapped I/O through
-  `kernel32` over FFM, `\\.\COMn` paths, exclusive open (a second open is `PortBusy`), listing with
-  `QueryDosDeviceW`. It is tested against a fake `Win32` (167 tests on macOS) and by an opt-in
-  `WindowsPortSuite` (set `FS2_SERIAL_TEST_PORT`; sends only `AT` and `ATI`). Struct layouts come
-  from the mingw-w64 headers, not from a probe. Mark/space parity and 1.5 stop bits are unsupported.
+- Windows backend (amd64 and aarch64): overlapped I/O through `kernel32` over FFM, `\\.\COMn` paths,
+  exclusive open (a second open is `PortBusy`), listing with `QueryDosDeviceW`. It is tested against
+  a fake `Win32`, and the whole suite passes on GitHub's Windows runner, which has no COM port.
+  Struct layouts come from the mingw-w64 headers, not from a probe. Mark/space parity and 1.5 stop
+  bits are unsupported.
+- Continuous integration on Linux (glibc 2.42, in Docker), macOS and Windows, and publishing to
+  Maven Central from a version tag.
+
+### Known gaps
+
+- **Windows has not been used with a real COM port.** Reads, writes, line settings and unplug are
+  untested on real hardware. Which Windows errors mean "device gone" is a guess.
+- Linux aarch64 has not been run. Linux needs glibc 2.42 or newer.
+- The macOS custom-baud-rate ioctl (`IOSSIOSPEED`) has only met a pseudo-terminal, which refuses it.
+  No real USB serial adapter has been tried on any platform.
+- A Linux pseudo-terminal forces 8 data bits and no parity, so those settings are not checked there.
 
 ### Notes
 
