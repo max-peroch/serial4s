@@ -41,6 +41,16 @@ bits and no parity, so those two settings are not checked on a pty there.
   fake, but it has never run on Windows. The opt-in `WindowsPortSuite` is the first check. See
   `AGENTS.md`.
 
+## Installing
+
+Not released yet. Once a version is out:
+
+```scala
+libraryDependencies += "io.github.max-peroch" %% "fs2-serial" % "<version>"
+```
+
+The JVM needs `--enable-native-access=ALL-UNNAMED` (see Requirements).
+
 ## Using it
 
 ```scala

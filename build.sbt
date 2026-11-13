@@ -1,4 +1,14 @@
-ThisBuild / scalaVersion      := "3.9.0"
+ThisBuild / scalaVersion := "3.9.0"
+ThisBuild / organization := "io.github.max-peroch"
+ThisBuild / homepage   := Some(uri("https://github.com/max-peroch/fs2-serial"))
+ThisBuild / developers := List(
+  Developer(
+    "max-peroch",
+    "max-peroch",
+    "",
+    uri("https://github.com/max-peroch")
+  )
+)
 ThisBuild / scalafmtOnCompile := true
 ThisBuild / licenses          := Seq(License.Apache2)
 ThisBuild / scalacOptions     := Seq(
@@ -9,8 +19,17 @@ ThisBuild / scalacOptions     := Seq(
   "22"
 )
 
+// Checked, in binary compatibility, against the version released before the one being built
+// (`mimaReportBinaryIssues`). There is nothing to compare with until the first release.
+lazy val againstLastRelease = Seq(
+  mimaPreviousArtifacts := previousStableVersion.value
+    .map(version => organization.value %% moduleName.value % version)
+    .toSet
+)
+
 lazy val root = rootProject
   .settings(
+    againstLastRelease,
     name := "fs2-serial",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-effect"         % "3.7.1",

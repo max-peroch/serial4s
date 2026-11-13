@@ -5,6 +5,7 @@ on:
     branches: ['**']
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -48,6 +49,15 @@ jobs:
       - name: Test
         run: sbt testFull
 
+      - name: Generate documentation
+        run: sbt doc
+
+      # Before 1.0 a release may break compatibility, so this reports and does
+      # not fail the build.
+      - name: Report binary compatibility with the last release
+        continue-on-error: true
+        run: sbt mimaReportBinaryIssues
+
   windows:
     # The Windows backend has never run on Windows. A Windows runner has no COM
     # port, so the opt-in WindowsPortSuite skips itself (it needs
@@ -74,3 +84,34 @@ jobs:
 
       - name: Test
         run: sbt testFull
+
+  publish:
+    name: Publish Artifacts
+    # Only on a version tag, and only once Linux and macOS pass. Windows is not
+    # required while it is allowed to fail.
+    needs: [linux, macos]
+    if: github.event_name != 'workflow_dispatch' && github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full, for the version from the tag)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: '25'
+          cache: sbt
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Publish
+        run: sbt ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}

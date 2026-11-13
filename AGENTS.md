@@ -192,3 +192,8 @@ backend works until it has run on Windows.
     touch files in `.claude/` that are staged but not part of your change.
 14. **Pinned versions.** Scala stays on 3.9.0 (LTS). Change a pinned version only when
     asked, and say why.
+15. **Releasing.** Push a tag `vX.Y.Z` on `main`: the `publish` job in `ci.yml` runs `sbt ci-release`
+    (sbt-ci-release; the version comes from the tag) once the Linux and macOS jobs pass. It needs
+    the secrets `PGP_SECRET`, `PGP_PASSPHRASE`, `SONATYPE_USERNAME` and `SONATYPE_PASSWORD`. Move
+    the `[Unreleased]` notes in `CHANGELOG.md` under the version first. NEVER tag without being
+    asked, and do not release while the Windows backend has never run on Windows without saying so.
