@@ -83,7 +83,18 @@ jobs:
         uses: sbt/setup-sbt@v1
 
       - name: Test
-        run: sbt testFull
+        shell: bash
+        run: sbt testFull 2>&1 | tee test.log
+
+      # The job log is only visible when signed in; annotations are not. This
+      # lists the failing tests and the compiler or sbt errors as annotations.
+      - name: Report failures
+        if: failure()
+        shell: bash
+        run: |
+          grep -E '==> X|\[error\]' test.log | head -40 | cut -c1-900 | while IFS= read -r line; do
+            echo "::error::${line//$'\r'/}"
+          done
 
   publish:
     name: Publish Artifacts
