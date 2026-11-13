@@ -1,0 +1,48 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: ['**']
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    # The Linux backend needs glibc 2.42 or newer, and ubuntu-latest has an
+    # older one. So the tests run in Docker on Ubuntu 25.10, as they do on a
+    # developer machine: format checks, every test as root, then the permission
+    # suites as a normal user.
+    name: Linux (glibc 2.42, in Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Test
+        run: ./docker/test-linux.sh
+
+  macos:
+    name: macOS (Java 25)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: '25'
+          cache: sbt
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Check formatting
+        run: sbt "scalafmtSbtCheck;scalafmtCheckAll"
+
+      - name: Test
+        run: sbt testFull
