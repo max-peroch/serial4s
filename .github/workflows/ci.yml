@@ -5,6 +5,7 @@ on:
     branches: ['**']
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -43,6 +44,33 @@ jobs:
 
       - name: Check formatting
         run: sbt "scalafmtSbtCheck;scalafmtCheckAll"
+
+      - name: Test
+        run: sbt testFull
+
+  windows:
+    # The Windows backend has never run on Windows. A Windows runner has no COM
+    # port, so the opt-in WindowsPortSuite skips itself (it needs
+    # FS2_SERIAL_TEST_PORT). This checks that kernel32 loads and binds, and that
+    # the tests that need no port pass there. It cannot check a real port.
+    # continue-on-error stays on until this has gone green once; then remove
+    # it, so a failure blocks a merge.
+    name: Windows (Java 25)
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: '25'
+          cache: sbt
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
 
       - name: Test
         run: sbt testFull
