@@ -37,9 +37,9 @@ bits and no parity, so those two settings are not checked on a pty there.
 ## Planned
 
 - Running the tests on aarch64 Linux and on a real serial adapter.
-- Windows. The design is ready for it (a backend seam, and `SystemError` has a `Windows` case), but
-  the backend is not written: it needs a Windows machine to be checked, and `Serial.make` says
-  "Windows has no backend yet". See `AGENTS.md`.
+- Running the Windows backend. It is written (overlapped I/O through `kernel32`) and tested against a
+  fake, but it has never run on Windows. The opt-in `WindowsPortSuite` is the first check. See
+  `AGENTS.md`.
 
 ## Using it
 

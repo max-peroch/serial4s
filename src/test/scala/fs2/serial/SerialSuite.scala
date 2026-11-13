@@ -78,13 +78,29 @@ final class SerialSuite extends CatsEffectSuite with PosixFixture {
     }
   }
 
-  test("Windows is Unsupported until it has a backend") {
+  test("Windows on a 32-bit architecture is Unsupported, with the reason") {
     Serial
-      .makeFor[IO](() => Right(Host(Os.Windows, "amd64")))
+      .makeFor[IO](() => Right(Host(Os.Windows, "x86")))
       .map(_.map(_ => ()))
       .assertEquals(
-        Left(PlatformError.Unsupported("Windows has no backend yet"))
+        Left(PlatformError.Unsupported("unsupported Windows architecture: x86"))
       )
+  }
+
+  test(
+    "Windows asked for on a machine that is not Windows cannot bind kernel32, and says so"
+  ) {
+    assume(
+      !Option(System.getProperty("os.name")).exists(_.startsWith("Windows")),
+      "this machine is Windows"
+    )
+    Serial
+      .makeFor[IO](() => Right(Host(Os.Windows, "amd64")))
+      .map {
+        case Left(PlatformError.Unsupported(reason)) =>
+          assert(reason.startsWith("cannot load kernel32"), reason)
+        case other => fail(s"expected Unsupported, got ${other.map(_ => ())}")
+      }
   }
 
   test(

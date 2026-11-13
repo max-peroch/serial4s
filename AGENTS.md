@@ -58,6 +58,10 @@ fs2.serial.backend    Backend[F], Device[F]        the seam to an operating syst
   -> errors, settings
 fs2.serial.backend.posix  PosixBackend, PosixDevice, PortOpener, IoErrors
   -> posix, discovery, platform, backend, errors, settings   macOS and Linux: select, wake pipe
+fs2.serial.backend.windows  WindowsBackend, WindowsDevice, WindowsOpener, WindowsIoErrors
+  -> win32, backend, errors, settings   Windows: overlapped I/O, wake event
+fs2.serial.win32      Win32[F], Operation[F], Dcb, CommTimeouts, WindowsErrors   the Windows calls as an algebra, plus pure data
+  -> errors, settings
 fs2.serial.discovery  PortEvent, PortLister, PortWatcher      finding ports
   -> platform, errors, settings
 fs2.serial.posix      Posix[F], IoBuffer[F], Fd, Selection, WaitLimit, ReadOutcome   the POSIX calls as an algebra
@@ -92,7 +96,7 @@ has not approved.
 
 ## Windows
 
-Not implemented. The design is ready for it: `Backend`/`Device` are the seam, `ManagedPort` is shared,
+Written, never run on Windows (`backend.windows`, `win32`, `ffi/Kernel32`, `ffi/WindowsLib`; 64-bit only). It is tested over a fake `Win32` and by the opt-in `WindowsPortSuite` (env `FS2_SERIAL_TEST_PORT`). The design: `Backend`/`Device` are the seam, `ManagedPort` is shared,
 `SystemError.Windows` exists, and `Serial.make` already dispatches on `Os` and says "Windows has no
 backend yet". Nothing in `posix`, `ffi` or `platform` fits Windows: it has handles, not descriptors,
 and overlapped I/O, not `select`. A Windows backend is a new `backend.windows` plus its own calls

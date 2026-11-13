@@ -2,9 +2,10 @@ package fs2.serial
 
 import fs2.serial.backend.Backend
 import fs2.serial.backend.posix.PosixBackend
+import fs2.serial.backend.windows.WindowsBackend
 import fs2.serial.discovery.{PortEvent, PortWatcher}
 import fs2.serial.errors.{ListError, OpenError, PlatformError, SerialException}
-import fs2.serial.ffi.Libc
+import fs2.serial.ffi.{Libc, WindowsLib}
 import fs2.serial.platform.{Host, NativeUnavailable, Os, Platform}
 import fs2.serial.port.{ManagedPort, SerialPort}
 import fs2.serial.settings.{PollInterval, SerialSettings}
@@ -71,9 +72,9 @@ object Serial {
       detect: () => Either[NativeUnavailable, Host]
   )(using F: Async[F]): F[Either[PlatformError, Serial[F]]] =
     F.delay(detect()).flatMap {
-      case Left(unavailable)          => unsupported(unavailable.reason)
-      case Right(Host(Os.Windows, _)) =>
-        unsupported("Windows has no backend yet")
+      case Left(unavailable) => unsupported(unavailable.reason)
+      case Right(Host(Os.Windows, architecture)) =>
+        windowsBackend[F](architecture)
       case Right(host) => posixBackend[F](host)
     }
 
@@ -81,6 +82,23 @@ object Serial {
       F: Async[F]
   ): F[Either[PlatformError, Serial[F]]] =
     F.pure(Left(PlatformError.Unsupported(reason)))
+
+  /** Windows: `kernel32`, bound once. Only the 64-bit targets: the structures
+    * the backend lays out are the 64-bit ones.
+    */
+  private def windowsBackend[F[_]](architecture: String)(using
+      F: Async[F]
+  ): F[Either[PlatformError, Serial[F]]] =
+    architecture match {
+      case "amd64" | "x86_64" | "aarch64" =>
+        WindowsLib.load[F].map {
+          case Left(unavailable) =>
+            Left(PlatformError.Unsupported(unavailable.reason))
+          case Right(win32) => Right(new Live[F](new WindowsBackend[F](win32)))
+        }
+      case other =>
+        unsupported(s"unsupported Windows architecture: $other")
+    }
 
   /** macOS and Linux: the POSIX calls for this host, bound once. */
   private def posixBackend[F[_]](host: Host)(using

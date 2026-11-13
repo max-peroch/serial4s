@@ -26,8 +26,12 @@
 
 - The backend seam: `Backend` and `Device` separate what every operating system shares (one read and
   one write at a time, closing, streams) from how it waits. Errors carry a `SystemError`, `Posix` or
-  `Windows`, so a Windows backend adds no breaking change. `Serial.make` reports an unsupported
-  system, including Windows for now, as a `PlatformError`.
+  `Windows`. `Serial.make` reports an unsupported system as a `PlatformError`.
+- Windows backend (amd64 and aarch64), **written but never run on Windows**: overlapped I/O through
+  `kernel32` over FFM, `\\.\COMn` paths, exclusive open (a second open is `PortBusy`), listing with
+  `QueryDosDeviceW`. It is tested against a fake `Win32` (167 tests on macOS) and by an opt-in
+  `WindowsPortSuite` (set `FS2_SERIAL_TEST_PORT`; sends only `AT` and `ATI`). Struct layouts come
+  from the mingw-w64 headers, not from a probe. Mark/space parity and 1.5 stop bits are unsupported.
 
 ### Notes
 
