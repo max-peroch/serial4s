@@ -10,11 +10,19 @@ import scala.jdk.OptionConverters.*
   */
 final class NativeAccessSuite extends CatsEffectSuite:
 
-  test("getpid from libc matches the JVM's process id") {
+  // On Windows the C runtime names it `_getpid`.
+  private val getpidName: String =
+    if Option(System.getProperty("os.name")).exists(_.startsWith("Windows"))
+    then "_getpid"
+    else "getpid"
+
+  test("getpid from the C library matches the JVM's process id") {
     val linker = Linker.nativeLinker()
     val getpid = for
-      symbol <- IO.fromOption(linker.defaultLookup().find("getpid").toScala)(
-        new NoSuchElementException("getpid not found in the default lookup")
+      symbol <- IO.fromOption(linker.defaultLookup().find(getpidName).toScala)(
+        new NoSuchElementException(
+          s"$getpidName not found in the default lookup"
+        )
       )
       handle = linker.downcallHandle(
         symbol,

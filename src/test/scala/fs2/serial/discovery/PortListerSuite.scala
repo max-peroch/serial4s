@@ -4,10 +4,14 @@ import fs2.serial.errors.ListError
 import fs2.serial.platform.MacOs
 import cats.effect.IO
 import java.nio.file.attribute.PosixFilePermissions
-import java.nio.file.{Files, Path}
+import java.nio.file.{FileSystems, Files, Path}
 import munit.CatsEffectSuite
 
 final class PortListerSuite extends CatsEffectSuite {
+
+  /** Windows file systems have no POSIX permissions to take away. */
+  private val hasPosixPermissions: Boolean =
+    FileSystems.getDefault.supportedFileAttributeViews.contains("posix")
 
   test("a device name is a serial port if it is cu.* or tty.*, with the dot") {
     val serial = List(
@@ -53,10 +57,11 @@ final class PortListerSuite extends CatsEffectSuite {
       directory =>
         use(directory).guarantee(IO.blocking {
           // a test may have taken the permissions away
-          Files.setPosixFilePermissions(
-            directory,
-            PosixFilePermissions.fromString("rwx------")
-          )
+          if (hasPosixPermissions)
+            Files.setPosixFilePermissions(
+              directory,
+              PosixFilePermissions.fromString("rwx------")
+            )
           Files.list(directory).forEach(Files.delete(_))
           Files.delete(directory)
         })
@@ -82,6 +87,7 @@ final class PortListerSuite extends CatsEffectSuite {
   }
 
   test("a directory the user may not read is AccessDenied") {
+    assume(hasPosixPermissions, "this file system has no POSIX permissions")
     assume(System.getProperty("user.name") != "root", "root can read anything")
     withDirectory { directory =>
       IO.blocking(
