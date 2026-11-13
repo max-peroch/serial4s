@@ -1,5 +1,6 @@
 ThisBuild / scalaVersion      := "3.9.0"
 ThisBuild / scalafmtOnCompile := true
+ThisBuild / licenses          := Seq(License.Apache2)
 ThisBuild / scalacOptions     := Seq(
   "-Wunused:all",
   "-Werror",

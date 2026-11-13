@@ -92,3 +92,7 @@ This project would not exist without two libraries it learned from:
   platform.
 
 The code here is written from scratch. It does not copy theirs.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
