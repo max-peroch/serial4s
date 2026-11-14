@@ -11,7 +11,7 @@
 # and dependency caches live in named Docker volumes, so only the first run is slow. To remove
 # everything this creates:
 #   docker rmi serial4s-linux
-#   docker volume rm fs2serial-cache fs2serial-sbt fs2serial-ivy
+#   docker volume rm serial4s-cache serial4s-sbt serial4s-ivy
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -32,9 +32,9 @@ echo "== image $IMAGE (sbt $SBT_VERSION)"
 docker build --quiet --tag "$IMAGE" --build-arg "SBT_VERSION=$SBT_VERSION" docker >/dev/null
 
 VOLUMES=(
-  -v fs2serial-cache:/root/.cache
-  -v fs2serial-sbt:/root/.sbt
-  -v fs2serial-ivy:/root/.ivy2
+  -v serial4s-cache:/root/.cache
+  -v serial4s-sbt:/root/.sbt
+  -v serial4s-ivy:/root/.ivy2
 )
 
 # The same copy of the project for both runs: no build output, no IDE files.
