@@ -43,11 +43,13 @@ bits and no parity, so those two settings are not checked on a pty there.
 
 ## Installing
 
-Not released yet. Once a version is out:
+Version 0.1.0 is on Maven Central:
 
 ```scala
-libraryDependencies += "io.github.max-peroch" %% "fs2-serial" % "<version>"
+libraryDependencies += "io.github.max-peroch" %% "fs2-serial" % "0.1.0"
 ```
+
+It is a first release: see the known gaps in `CHANGELOG.md`.
 
 The JVM needs `--enable-native-access=ALL-UNNAMED` (see Requirements).
 

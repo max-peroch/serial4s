@@ -55,3 +55,6 @@ First release.
 - Needs JDK 22 or newer and `--enable-native-access=ALL-UNNAMED`.
 - No C code, no JNI, no Akka: the C library is called through the Java Foreign Function and
   Memory API.
+
+[Unreleased]: https://github.com/max-peroch/fs2-serial/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/max-peroch/fs2-serial/releases/tag/v0.1.0
