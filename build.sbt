@@ -1,7 +1,7 @@
 ThisBuild / scalaVersion := "3.9.0"
 ThisBuild / organization := "io.github.max-peroch"
-ThisBuild / homepage   := Some(uri("https://github.com/max-peroch/serial4s"))
-ThisBuild / developers := List(
+ThisBuild / homepage     := Some(uri("https://github.com/max-peroch/serial4s"))
+ThisBuild / developers   := List(
   Developer(
     "max-peroch",
     "max-peroch",
