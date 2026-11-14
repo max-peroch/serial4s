@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Renamed to serial4s.** The artifact is `io.github.max-peroch %% serial4s` (0.1.0 was published
+  as `fs2-serial`, which stays on Maven Central and is not updated), the package is `serial4s`
+  (was `fs2.serial`), and the repository is `max-peroch/serial4s`. The test environment variables
+  are `SERIAL4S_TEST_PORT` and `SERIAL4S_TEST_BAUD` (were `FS2_SERIAL_...`).
+
 ## [0.1.0] - 2026-11-13
 
 First release.
@@ -56,5 +63,5 @@ First release.
 - No C code, no JNI, no Akka: the C library is called through the Java Foreign Function and
   Memory API.
 
-[Unreleased]: https://github.com/max-peroch/fs2-serial/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/max-peroch/fs2-serial/releases/tag/v0.1.0
+[Unreleased]: https://github.com/max-peroch/serial4s/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/max-peroch/serial4s/releases/tag/v0.1.0

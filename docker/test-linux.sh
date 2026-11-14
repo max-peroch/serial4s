@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs fs2-serial's whole test suite on Linux, in Docker.
+# Runs serial4s's whole test suite on Linux, in Docker.
 #
 # Builds a local image from docker/Dockerfile (this pulls ubuntu:25.10 the first time: run it only
 # if you approve that), then:
@@ -10,13 +10,13 @@
 # The project is mounted read-only and copied, so nothing is written to your working tree. The sbt
 # and dependency caches live in named Docker volumes, so only the first run is slow. To remove
 # everything this creates:
-#   docker rmi fs2-serial-linux
+#   docker rmi serial4s-linux
 #   docker volume rm fs2serial-cache fs2serial-sbt fs2serial-ivy
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-IMAGE=fs2-serial-linux
+IMAGE=serial4s-linux
 SBT_VERSION=$(sed -n 's/^sbt.version *= *//p' project/build.properties)
 
 if ! docker info >/dev/null 2>&1; then

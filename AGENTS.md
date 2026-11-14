@@ -1,6 +1,6 @@
 # AGENTS.md
 
-fs2-serial is a serial port library for Scala 3, on cats-effect and fs2. It replaces
+serial4s is a serial port library for Scala 3, on cats-effect and fs2. It replaces
 jSerialComm and akka-serial: it talks to the operating system directly through the Java
 Foreign Function & Memory API (`java.lang.foreign`), with no C code, no JNI and no
 Akka. It targets POSIX (macOS and Linux) first. Windows is out of scope for now.
@@ -45,35 +45,35 @@ Each package has one job. A package depends only on those listed after its arrow
 other way round (checked from the imports; there is no cycle).
 
 ```
-fs2.serial            Serial[F], Serial.make      composition root: made once, it picks the backend
+serial4s            Serial[F], Serial.make      composition root: made once, it picks the backend
   -> settings, errors, port, backend, discovery, platform, ffi
-fs2.serial.settings   BaudRate, CharSize, Parity, StopBits, FlowControl, SerialSettings,
+serial4s.settings   BaudRate, CharSize, Parity, StopBits, FlowControl, SerialSettings,
                       SettingError, PollInterval   what a caller chooses: valid values only
-fs2.serial.errors     OpenError, ReadError, WriteError, ListError, PlatformError, SerialException,
+serial4s.errors     OpenError, ReadError, WriteError, ListError, PlatformError, SerialException,
                       SystemError (Posix | Windows), Errno, ErrnoName, WindowsError, WindowsErrorName
                                                    what can go wrong, as values
-fs2.serial.port       SerialPort, ManagedPort      what every OS shares: one read and one write
+serial4s.port       SerialPort, ManagedPort      what every OS shares: one read and one write
   -> backend, errors, settings                     at a time, closing, streams
-fs2.serial.backend    Backend[F], Device[F]        the seam to an operating system
+serial4s.backend    Backend[F], Device[F]        the seam to an operating system
   -> errors, settings
-fs2.serial.backend.posix  PosixBackend, PosixDevice, PortOpener, IoErrors
+serial4s.backend.posix  PosixBackend, PosixDevice, PortOpener, IoErrors
   -> posix, discovery, platform, backend, errors, settings   macOS and Linux: select, wake pipe
-fs2.serial.backend.windows  WindowsBackend, WindowsDevice, WindowsOpener, WindowsIoErrors
+serial4s.backend.windows  WindowsBackend, WindowsDevice, WindowsOpener, WindowsIoErrors
   -> win32, backend, errors, settings   Windows: overlapped I/O, wake event
-fs2.serial.win32      Win32[F], Operation[F], Dcb, CommTimeouts, WindowsErrors   the Windows calls as an algebra, plus pure data
+serial4s.win32      Win32[F], Operation[F], Dcb, CommTimeouts, WindowsErrors   the Windows calls as an algebra, plus pure data
   -> errors, settings
-fs2.serial.discovery  PortEvent, PortLister, PortWatcher      finding ports
+serial4s.discovery  PortEvent, PortLister, PortWatcher      finding ports
   -> platform, errors, settings
-fs2.serial.posix      Posix[F], IoBuffer[F], Fd, Selection, WaitLimit, ReadOutcome   the POSIX calls as an algebra
+serial4s.posix      Posix[F], IoBuffer[F], Fd, Selection, WaitLimit, ReadOutcome   the POSIX calls as an algebra
   -> errors, settings
-fs2.serial.ffi        Libc, Syscalls, SegmentBuffer   the only code that calls into C
+serial4s.ffi        Libc, Syscalls, SegmentBuffer   the only code that calls into C
   -> posix, platform, errors, settings
-fs2.serial.platform   Platform, MacOs, Linux, Os, Host, Width, NonStandardRates, NativeUnavailable
+serial4s.platform   Platform, MacOs, Linux, Os, Host, Width, NonStandardRates, NativeUnavailable
                                                    per-OS data: no code
   -> errors, settings
 ```
 
-Test helpers are in `fs2.serial.testing`. A test sits in the package of what it tests.
+Test helpers are in `serial4s.testing`. A test sits in the package of what it tests.
 
 **`java.lang.foreign` lives only in `ffi`** (the tests' `PseudoTerminal` helper aside). `Posix`
 hands out an `IoBuffer[F]` instead of a pointer, and `platform` is plain data. Keep it that way:
@@ -96,7 +96,7 @@ has not approved.
 
 ## Windows
 
-Written. The suite passes on a Windows CI runner (no COM port); it has never been used with a real port (`backend.windows`, `win32`, `ffi/Kernel32`, `ffi/WindowsLib`; 64-bit only). It is tested over a fake `Win32` and by the opt-in `WindowsPortSuite` (env `FS2_SERIAL_TEST_PORT`). The design: `Backend`/`Device` are the seam, `ManagedPort` is shared,
+Written. The suite passes on a Windows CI runner (no COM port); it has never been used with a real port (`backend.windows`, `win32`, `ffi/Kernel32`, `ffi/WindowsLib`; 64-bit only). It is tested over a fake `Win32` and by the opt-in `WindowsPortSuite` (env `SERIAL4S_TEST_PORT`). The design: `Backend`/`Device` are the seam, `ManagedPort` is shared,
 `SystemError.Windows` exists, and `Serial.make` dispatches on `Os`. Nothing in `posix`, `ffi` or `platform` fits Windows: it has handles, not descriptors,
 and overlapped I/O, not `select`. A Windows backend is a new `backend.windows` plus its own calls
 (`CreateFileW`, `Get/SetCommState`, `SetCommTimeouts`, overlapped `ReadFile`/`WriteFile`,
@@ -106,7 +106,7 @@ and overlapped I/O, not `select`. A Windows backend is a new `backend.windows` p
 means `PortBusy` (a COM port has no per-user permissions); open `\\.\COMn`, always, for ports above 9;
 `WindowsErrorName` has names only and takes its numbers from `winerror.h` with the backend.
 
-I cannot run anything on Windows: the maintainer runs the Windows tests and pastes the output. A test that opens a real COM port is opt-in (`FS2_SERIAL_TEST_PORT` names the port, and the test is skipped when it is absent). Tell the maintainer before it opens the port (rule 11), send only harmless commands (`AT`, `ATI`, `ATE0`, `ATE1`), and NEVER dial (`ATD`), answer (`ATA`) or store a profile (`AT&W`). What still cannot be checked: hot unplug (unless the device is USB), and two ends of a link. Struct sizes and constants (`DCB`,
+I cannot run anything on Windows: the maintainer runs the Windows tests and pastes the output. A test that opens a real COM port is opt-in (`SERIAL4S_TEST_PORT` names the port, and the test is skipped when it is absent). Tell the maintainer before it opens the port (rule 11), send only harmless commands (`AT`, `ATI`, `ATE0`, `ATE1`), and NEVER dial (`ATD`), answer (`ATA`) or store a profile (`AT&W`). What still cannot be checked: hot unplug (unless the device is USB), and two ends of a link. Struct sizes and constants (`DCB`,
 `COMMTIMEOUTS`, `OVERLAPPED`) can also be printed with a `mingw-w64` probe in Docker; installing mingw
 or Wine in the image needs the maintainer's approval, like any other image. Do not claim a Windows
 backend works on hardware until it has run against a real COM port.

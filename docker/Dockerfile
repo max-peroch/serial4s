@@ -1,4 +1,4 @@
-# Linux for fs2-serial's tests.
+# Linux for serial4s's tests.
 #
 # glibc 2.42 is the oldest the Linux backend supports (it made speed_t the rate itself), and
 # Ubuntu 25.10 is the first Ubuntu to ship it: the usual JDK images are older. gcc is here for the

@@ -1,6 +1,6 @@
 ThisBuild / scalaVersion := "3.9.0"
 ThisBuild / organization := "io.github.max-peroch"
-ThisBuild / homepage   := Some(uri("https://github.com/max-peroch/fs2-serial"))
+ThisBuild / homepage   := Some(uri("https://github.com/max-peroch/serial4s"))
 ThisBuild / developers := List(
   Developer(
     "max-peroch",
@@ -30,7 +30,7 @@ lazy val againstLastRelease = Seq(
 lazy val root = rootProject
   .settings(
     againstLastRelease,
-    name := "fs2-serial",
+    name := "serial4s",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-effect"         % "3.7.1",
       "co.fs2"        %% "fs2-io"              % "3.14.0",

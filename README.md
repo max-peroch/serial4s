@@ -1,4 +1,4 @@
-# fs2-serial
+# serial4s
 
 A serial port library for Scala 3, on cats-effect and fs2. It talks to the operating
 system directly through the Java Foreign Function & Memory API: no C code, no JNI, no
@@ -46,7 +46,7 @@ bits and no parity, so those two settings are not checked on a pty there.
 Version 0.1.0 is on Maven Central:
 
 ```scala
-libraryDependencies += "io.github.max-peroch" %% "fs2-serial" % "0.1.0"
+libraryDependencies += "io.github.max-peroch" %% "serial4s" % "0.1.0"
 ```
 
 It is a first release: see the known gaps in `CHANGELOG.md`.
@@ -57,8 +57,8 @@ The JVM needs `--enable-native-access=ALL-UNNAMED` (see Requirements).
 
 ```scala
 import cats.effect.IO
-import fs2.serial.Serial
-import fs2.serial.settings.SerialSettings
+import serial4s.Serial
+import serial4s.settings.SerialSettings
 
 Serial.make[IO].flatMap {
   case Left(error)   => IO.println(s"not supported here: $error")
@@ -70,9 +70,9 @@ Serial.make[IO].flatMap {
 }
 ```
 
-The public types are in `fs2.serial` (`Serial`), `fs2.serial.port` (`SerialPort`),
-`fs2.serial.settings` (what you choose), `fs2.serial.errors` (what can go wrong) and
-`fs2.serial.discovery` (`PortEvent`).
+The public types are in `serial4s` (`Serial`), `serial4s.port` (`SerialPort`),
+`serial4s.settings` (what you choose), `serial4s.errors` (what can go wrong) and
+`serial4s.discovery` (`PortEvent`).
 
 ## Testing on Linux
 
