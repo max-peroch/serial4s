@@ -33,7 +33,7 @@ lazy val root = rootProject
     name := "serial4s",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-effect"         % "3.7.1",
-      "co.fs2"        %% "fs2-io"              % "3.14.0",
+      "co.fs2"        %% "fs2-io"              % "3.16.0",
       "org.typelevel" %% "cats-effect-testkit" % "3.7.1" % Test,
       "org.scalameta" %% "munit"               % "1.3.6" % Test,
       "org.typelevel" %% "munit-cats-effect"   % "2.2.1" % Test
